@@ -171,25 +171,26 @@ describe("Overbitegg", function () {
       await expect(contract.publicMint(1), {value: ether("0.1")}).to.be.revertedWith("INSUFFICIENT_AMOUNT");
     });
 
-    // it("should not mint when there is no more supply", async function () {
-    //   [owner, minter] = await ethers.getSigners();
-    //   const giftProof = await createProof("GIFT", owner, owner, 1000);
+    it("should not mint when there is no more supply", async function () {
+      [owner, minter] = await ethers.getSigners();
+      const giftProof = await createProof("GIFT", owner, owner, 100);
 
-    //   for (let i = 0; i < 10; i++) {
-    //     await this.overbitegg.giftMint(1000, giftProof, {gasLimit: 30000000});
-    //   }
+      await this.overbitegg.giftMint(100, 100, giftProof, {gasLimit: 30000000});
 
-    //   await this.overbitegg.activatePublicMint();
-    //   const contract = this.overbitegg.connect(minter);
-    //   await expect(contract.publicMint(1, {value: ether("0.1")})).to.be.revertedWith("SUPPLY_EXHAUSTED");
-    // });
-  });
-
-  describe("activatePublicMint", function () {
-
+      await this.overbitegg.activatePublicMint();
+      const contract = this.overbitegg.connect(minter);
+      await expect(contract.publicMint(1, {value: ether("0.069")})).to.be.revertedWith("SUPPLY_EXHAUSTED");
+    });
   });
 
   describe("disablePublicMint", function () {
+    it("should disable public mint", async function () {
+      [owner, minter] = await ethers.getSigners();
+      await this.overbitegg.activatePublicMint();
+      await this.overbitegg.disablePublicMint();
 
+      const contract = this.overbitegg.connect(minter);
+      await expect(contract.publicMint(1)).to.be.revertedWith("PUBLIC_MINT_NOT_ACTIVE");
+    });
   });
 });
